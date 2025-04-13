@@ -1,0 +1,13 @@
+{
+  "name": "eth-contract-reviewer",
+  "license": "UNLICENSED",
+  "scripts": {
+    "build": "graph build",
+    "deploy": "graph deploy --node https://api.studio.thegraph.com/deploy/ eth-contract-reviewer",
+    "create-local": "graph create --node http://localhost:8020/ eth-contract-reviewer",
+    "remove-local": "graph remove --node http://localhost:8020/ eth-contract-reviewer",
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 eth-contract-reviewer",
+    "test": "graph test"
+  },
+  "dependencies": { "@graphprotocol/graph-cli": "0.97.0" }
+}

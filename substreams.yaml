@@ -1,0 +1,55 @@
+specVersion: v0.1.0
+package:
+  name: contract_reviewer
+  version: v0.1.0
+
+imports:
+  entity: https://github.com/streamingfast/substreams-entity-change/releases/download/v0.2.1/substreams-entity-change-v0.2.1.spkg
+
+protobuf:
+  files:
+    - proto/contract/v1/contract.proto
+  importPaths:
+    - ./proto
+
+binaries:
+  default:
+    type: wasm/rust-v1
+    file: ./target/wasm32-unknown-unknown/release/contract_reviewer.wasm
+
+modules:
+  - name: map_contract_usage
+    kind: map
+    initialBlock: 0
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:contract.v1.ContractEvents
+
+  - name: store_contract_stats
+    kind: store
+    updatePolicy: set
+    valueType: proto:contract.v1.ContractUsage
+    inputs:
+      - map: map_contract_usage
+
+  - name: store_daily_stats
+    kind: store
+    updatePolicy: set
+    valueType: proto:contract.v1.DailyStats
+    inputs:
+      - map: map_contract_usage
+      - store: store_contract_stats
+        mode: deltas
+
+  - name: graph_out
+    kind: map
+    initialBlock: 0
+    inputs:
+      - map: map_contract_usage
+      - store: store_contract_stats
+        mode: deltas
+      - store: store_daily_stats
+        mode: deltas
+    output:
+      type: proto:substreams.entity.v1.EntityChanges

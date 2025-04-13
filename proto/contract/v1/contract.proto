@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package contract.v1;
+
+message ContractUsage {
+  string address = 1;
+  uint64 first_interaction_block = 2;
+  uint64 last_interaction_block = 3;
+  uint64 total_calls = 4;
+  uint64 unique_wallets = 5;
+  repeated string interacting_wallets = 6;
+  bool is_new_contract = 7;
+  uint64 day_timestamp = 8;
+}
+
+message WalletInteraction {
+  string wallet_address = 1;
+  uint64 interaction_count = 2;
+  uint64 first_interaction_block = 3;
+  uint64 last_interaction_block = 4;
+  bool is_repeat_user = 5;
+}
+
+message ContractEvents {
+  repeated ContractUsage contracts = 1;
+}
+
+message DailyStats {
+  uint64 day_timestamp = 1;
+  uint64 active_contracts = 2;
+  uint64 new_contracts = 3;
+  uint64 total_calls = 4;
+  uint64 unique_wallets = 5;
+}
