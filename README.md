@@ -72,7 +72,7 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
 
 ## 🔍 Sample Queries
 
-### 1. 📅 Get daily stats summary for the last 5 days
+### 1. 📅 Daily Overview of Network Activity (Last 5 Days)
 ```graphql
 {
   dailyStats(first: 5, orderBy: dayTimestamp, orderDirection: desc) {
@@ -83,70 +83,51 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     uniqueWallets
   }
 }
+
 ```
 
-### 2. 🧠 Top 10 most-called contracts
+### 2. 🧠 Top 10 most-active contracts
 ```graphql
 {
   contracts(first: 10, orderBy: totalCalls, orderDirection: desc) {
-    id
     address
     totalCalls
     uniqueWallets
+    firstInteractionBlock
+    lastInteractionBlock
   }
 }
+
 ```
-### 3. 👛 Wallet interaction history
+### 3. 👛 Stats for a Specific Wallet
 ```graphql
 {
   wallet(id: "0xabc123...") {
-    address
+    id
     totalInteractions
-    contractsInteracted
-    interactions {
-      contract {
-        id
-        address
-      }
-      blockNumber
-      timestamp
-    }
   }
 }
 ```
 
-### 4. 🆕 Recently created contracts
+### 4. 🆕 Recently Active Contracts
 ```graphql
 {
-  contractCreations(first: 5, orderBy: blockNumber, orderDirection: desc) {
-    contract {
-      id
-      address
-    }
-    creator {
-      id
-    }
-    blockNumber
-    timestamp
-    transactionHash
+  contracts(first: 10, orderBy: lastInteractionBlock, orderDirection: desc) {
+    address
+    lastInteractionBlock
+    totalCalls
   }
 }
+
 ```
 
-### 5. 🔁 Recent contract events
+### 5. 🔁 Total Number of Unique Wallets Seen Per Day
 ```graphql
 {
-  contractEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
-    contract {
-      id
-    }
-    wallet {
-      id
-    }
-    eventType
-    blockNumber
-    transactionHash
-    logIndex
+  dailyStats(first: 10, orderBy: dayTimestamp, orderDirection: desc) {
+    dayTimestamp
+    uniqueWallets
   }
 }
+
 ```
