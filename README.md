@@ -8,10 +8,10 @@ This Substreams package tracks smart contract interactions, events, and creation
 
 The **Contract Reviewer Substreams** package analyzes Ethereum data to extract and structure:
 
-- ✅ Contract usage patterns  
-- ✅ Smart contract events  
-- ✅ Contract creation transactions  
-- ✅ Wallet-to-contract interactions  
+✅ Contract usage patterns  
+✅ Wallet interaction summaries  
+✅ Daily on-chain activity trends  
+
 
 All data is output in a format consumable by The Graph.
 
@@ -44,29 +44,32 @@ To ensure high performance and efficient indexing, this package includes practic
 
 ---
 
-## 🧬 Entities
+Contract
+Represents a smart contract that has received calls. Tracks usage metrics:
 
-### `Contract`
-Stores contract metadata and usage stats.  
-Tracks events, interactions, and creation history.
+Total number of calls
 
-### `Wallet`
-Tracks wallet-level interactions across contracts, creation activity, and event triggers.
+Unique wallet count
 
-### `Interaction`
-Represents an individual interaction (call) between a wallet and a contract.
+First and last block interactions
 
-### `ContractEvent`
-Captures emitted events (log entries) triggered by wallets interacting with contracts.
+Wallet
+Represents a wallet address that has interacted with one or more contracts.
 
-### `ContractCreation`
-Logs contract deployment metadata including creator, bytecode, and block info.
+Tracks total interaction count
 
-### `DailyContractStat`
-Tracks per-contract call volume and unique users per day.
+DailyStat
+System-wide daily activity snapshot:
 
-### `DailyStat`
-System-wide aggregate for active contracts, calls, and unique wallets per day.
+Active contracts
+
+New contracts
+
+Total calls
+
+Unique wallets
+
+
 
 ---
 
