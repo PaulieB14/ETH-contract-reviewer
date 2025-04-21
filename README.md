@@ -83,8 +83,10 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     uniqueWallets
   }
 }
+```
 
 # 2. 🧠 Top 10 most-called contracts
+```graphql
 {
   contracts(first: 10, orderBy: totalCalls, orderDirection: desc) {
     id
@@ -93,8 +95,9 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     uniqueWallets
   }
 }
-
+```
 # 3. 👛 Wallet interaction history
+```graphql
 {
   wallet(id: "0xabc123...") {
     address
@@ -110,8 +113,10 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     }
   }
 }
+```
 
 # 4. 🆕 Recently created contracts
+```graphql
 {
   contractCreations(first: 5, orderBy: blockNumber, orderDirection: desc) {
     contract {
@@ -126,8 +131,10 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     transactionHash
   }
 }
+```
 
 # 5. 🔁 Recent contract events
+```graphql
 {
   contractEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
     contract {
@@ -142,3 +149,4 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     logIndex
   }
 }
+```
