@@ -83,3 +83,62 @@ System-wide aggregate for active contracts, calls, and unique wallets per day.
     uniqueWallets
   }
 }
+
+# 2. 🧠 Top 10 most-called contracts
+{
+  contracts(first: 10, orderBy: totalCalls, orderDirection: desc) {
+    id
+    address
+    totalCalls
+    uniqueWallets
+  }
+}
+
+# 3. 👛 Wallet interaction history
+{
+  wallet(id: "0xabc123...") {
+    address
+    totalInteractions
+    contractsInteracted
+    interactions {
+      contract {
+        id
+        address
+      }
+      blockNumber
+      timestamp
+    }
+  }
+}
+
+# 4. 🆕 Recently created contracts
+{
+  contractCreations(first: 5, orderBy: blockNumber, orderDirection: desc) {
+    contract {
+      id
+      address
+    }
+    creator {
+      id
+    }
+    blockNumber
+    timestamp
+    transactionHash
+  }
+}
+
+# 5. 🔁 Recent contract events
+{
+  contractEvents(first: 10, orderBy: timestamp, orderDirection: desc) {
+    contract {
+      id
+    }
+    wallet {
+      id
+    }
+    eventType
+    blockNumber
+    transactionHash
+    logIndex
+  }
+}
