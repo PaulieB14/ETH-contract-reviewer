@@ -1,71 +1,85 @@
 # Contract Interaction Analytics Substreams
 
-This package tracks contract interactions, events, and creations on Ethereum from January 2023 onwards (starting at block 16308000). It provides detailed analytics about contract usage and wallet interactions.
+This Substreams package tracks smart contract interactions, events, and creations on Ethereum from **January 2023 onward** (starting at block `16,308,000`). It provides deep analytics into how contracts are used and how wallets interact with them.
+
+---
 
 ## Overview
 
-The Contract Reviewer Substreams package analyzes Ethereum blockchain data to extract and process information about smart contract interactions. It tracks:
+The **Contract Reviewer Substreams** package analyzes Ethereum data to extract and structure:
 
-- Contract usage patterns
-- Contract events
-- Contract creations
-- Wallet interactions
+- ✅ Contract usage patterns  
+- ✅ Smart contract events  
+- ✅ Contract creation transactions  
+- ✅ Wallet-to-contract interactions  
 
-## Data Limitations
+All data is output in a format consumable by The Graph.
 
-For performance and efficiency reasons, this subgraph implements several practical limitations:
+---
 
-- Only processes transactions with gas used above 21,000 (basic ETH transfer)
-- Limits processing to a maximum of 1,000 contracts per block
-- Stores a maximum of 100 wallet addresses per contract
-- Captures only up to 10 interactions per contract in the graph output
-- Considers contracts "new" for a window of 1,000 blocks after first interaction
-- Indexes data starting from January 2023 (block 16,308,000) for relevance and performance
+## ⚠️ Data Limitations
 
-These limitations ensure efficient indexing and query performance while capturing the most relevant contract activity data.
+To ensure high performance and efficient indexing, this package includes practical constraints:
 
-## Modules
+- Ignores transactions with gas used ≤ `21,000` (simple ETH transfers)
+- Limits to **1,000 contracts per block**
+- Stores up to **100 wallet addresses per contract**
+- Outputs a max of **10 interactions per contract**
+- Marks contracts as “new” for **1,000 blocks after their first interaction**
+- Indexes from **January 2023 (block 16,308,000)** onward
 
-### map_block_index
+---
 
-Indexes Ethereum blocks for use by other modules. This module simply passes through the block for use by other modules, particularly the contract creation module.
+## 🧱 Modules
 
-### map_contract_events
+| Module Name           | Description |
+|-----------------------|-------------|
+| `map_block_index`     | Passes block data downstream for reuse |
+| `map_contract_events` | Extracts logs and event metadata per contract |
+| `map_contract_creation` | Detects new contract creations + metadata |
+| `map_contract_usage`  | Analyzes interaction and call frequency |
+| `store_contract_stats`| Stores contract-level aggregated data |
+| `store_daily_stats`   | Tracks system-wide daily usage trends |
+| `graph_out`           | Outputs all changes to be consumed by The Graph |
 
-Extracts contract events from transaction logs. This module processes all transaction logs in a block to identify and extract contract events. Each event includes the contract address, wallet address, transaction hash, log index, and event signature.
+---
 
-### map_contract_creation
+## 🧬 Entities
 
-Detects contract creations from transactions. This module identifies contract creation transactions and extracts information about newly created contracts, including the creator address, contract address, and contract bytecode.
+### `Contract`
+Stores contract metadata and usage stats.  
+Tracks events, interactions, and creation history.
 
-### map_contract_usage
+### `Wallet`
+Tracks wallet-level interactions across contracts, creation activity, and event triggers.
 
-Analyzes contract usage patterns from transactions. This module tracks contract interactions, unique wallets, and call counts. It also incorporates data from contract events and creations to provide a comprehensive view of contract usage.
+### `Interaction`
+Represents an individual interaction (call) between a wallet and a contract.
 
-### store_contract_stats
+### `ContractEvent`
+Captures emitted events (log entries) triggered by wallets interacting with contracts.
 
-Stores contract usage statistics. This module maintains a store of contract usage data, including interaction counts, unique wallet counts, and first/last interaction blocks.
+### `ContractCreation`
+Logs contract deployment metadata including creator, bytecode, and block info.
 
-### store_daily_stats
+### `DailyContractStat`
+Tracks per-contract call volume and unique users per day.
 
-Aggregates daily statistics for contracts. This module maintains daily aggregated statistics across all contracts, including active contracts, new contracts, total calls, and unique wallets.
+### `DailyStat`
+System-wide aggregate for active contracts, calls, and unique wallets per day.
 
-### graph_out
+---
 
-Generates entity changes for The Graph. This module transforms contract data into entity changes that can be consumed by a subgraph. It creates entities for contracts, wallets, interactions, events, and statistics.
+## 🔍 Sample Queries
 
-## Entities
-
-- **Contract**: Information about a smart contract, including usage statistics
-- **Wallet**: Information about a wallet that interacts with contracts
-- **Interaction**: Record of a wallet interacting with a contract
-- **ContractEvent**: Detailed information about events emitted by contracts
-- **ContractCreation**: Information about contract creation transactions
-- **DailyContractStat**: Daily statistics for a specific contract
-- **DailyStat**: Aggregated daily statistics across all contracts
-
-## Usage
-
-This Substreams package can be used with The Graph to create a subgraph that indexes contract interactions, events, and creations.
-
-
+### 1. 📅 Get daily stats summary for the last 5 days
+```graphql
+{
+  dailyStats(first: 5, orderBy: dayTimestamp, orderDirection: desc) {
+    dayTimestamp
+    activeContracts
+    newContracts
+    totalCalls
+    uniqueWallets
+  }
+}
