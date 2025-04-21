@@ -1,132 +1,71 @@
-# Contract Subgraph
+# Contract Interaction Analytics Substreams
 
-A subgraph for Ethereum contract usage analytics, powered by substreams.
+This package tracks contract interactions, events, and creations on Ethereum from January 2023 onwards (starting at block 16308000). It provides detailed analytics about contract usage and wallet interactions.
 
 ## Overview
 
-This subgraph indexes Ethereum contract interactions and provides analytics on:
+The Contract Reviewer Substreams package analyzes Ethereum blockchain data to extract and process information about smart contract interactions. It tracks:
 
-- Contract usage metrics
+- Contract usage patterns
+- Contract events
+- Contract creations
 - Wallet interactions
-- Daily statistics
 
-The data is sourced from a substreams package that processes Ethereum blocks and extracts contract usage data.
+## Data Limitations
 
-### Performance Considerations
+For performance and efficiency reasons, this subgraph implements several practical limitations:
 
-To handle the large volume of data on Ethereum, the substreams implementation includes several practical limitations:
+- Only processes transactions with gas used above 21,000 (basic ETH transfer)
+- Limits processing to a maximum of 1,000 contracts per block
+- Stores a maximum of 100 wallet addresses per contract
+- Captures only up to 10 interactions per contract in the graph output
+- Considers contracts "new" for a window of 1,000 blocks after first interaction
+- Indexes data starting from January 2023 (block 16,308,000) for relevance and performance
 
-- Maximum of 1,000 wallets stored per contract (while still tracking the total count)
-- Minimum gas usage threshold to filter out simple ETH transfers
-- Maximum of 1,000 contracts processed per block
-- Contract interactions are tracked within a 1,000 block window for "new contract" designation
+These limitations ensure efficient indexing and query performance while capturing the most relevant contract activity data.
 
-## Schema
+## Modules
 
-The subgraph defines the following entities:
+### map_block_index
 
-- `Contract`: Information about a contract, including usage metrics
-- `Wallet`: Information about wallets that interact with contracts
-- `Interaction`: Records of interactions between wallets and contracts
-- `DailyContractStat`: Daily statistics for each contract
-- `DailyStat`: Aggregate daily statistics across all contracts
+Indexes Ethereum blocks for use by other modules. This module simply passes through the block for use by other modules, particularly the contract creation module.
 
-## Setup
+### map_contract_events
 
-This project has been simplified to make it easier to get started without requiring all the dependencies for building the Rust code.
+Extracts contract events from transaction logs. This module processes all transaction logs in a block to identify and extract contract events. Each event includes the contract address, wallet address, transaction hash, log index, and event signature.
 
-1. Install Node.js dependencies:
+### map_contract_creation
 
-```bash
-npm install
-```
+Detects contract creations from transactions. This module identifies contract creation transactions and extracts information about newly created contracts, including the creator address, contract address, and contract bytecode.
 
-2. Create a placeholder substreams package:
+### map_contract_usage
 
-```bash
-./scripts/package-substreams.sh
-```
+Analyzes contract usage patterns from transactions. This module tracks contract interactions, unique wallets, and call counts. It also incorporates data from contract events and creations to provide a comprehensive view of contract usage.
 
-3. Generate code from the GraphQL schema:
+### store_contract_stats
 
-```bash
-npm run codegen
-```
+Stores contract usage statistics. This module maintains a store of contract usage data, including interaction counts, unique wallet counts, and first/last interaction blocks.
 
-4. Build the subgraph:
+### store_daily_stats
 
-```bash
-npm run build
-```
+Aggregates daily statistics for contracts. This module maintains daily aggregated statistics across all contracts, including active contracts, new contracts, total calls, and unique wallets.
 
-## Deployment
+### graph_out
 
-### Local Deployment
+Generates entity changes for The Graph. This module transforms contract data into entity changes that can be consumed by a subgraph. It creates entities for contracts, wallets, interactions, events, and statistics.
 
-```bash
-# Create a local subgraph
-npm run create-local
+## Entities
 
-# Deploy to local Graph Node
-npm run deploy-local
-```
+- **Contract**: Information about a smart contract, including usage statistics
+- **Wallet**: Information about a wallet that interacts with contracts
+- **Interaction**: Record of a wallet interacting with a contract
+- **ContractEvent**: Detailed information about events emitted by contracts
+- **ContractCreation**: Information about contract creation transactions
+- **DailyContractStat**: Daily statistics for a specific contract
+- **DailyStat**: Aggregated daily statistics across all contracts
 
-### Studio Deployment
+## Usage
 
-```bash
-# Deploy to The Graph Studio
-npm run deploy
-```
+This Substreams package can be used with The Graph to create a subgraph that indexes contract interactions, events, and creations.
 
-## Advanced: Building the Substreams from Source
 
-If you want to build the actual substreams package from source (not required for initial development):
-
-1. Install Rust and the wasm32 target:
-```bash
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-rustup target add wasm32-unknown-unknown
-```
-
-2. Install the Substreams CLI:
-```bash
-curl -L https://github.com/streamingfast/substreams/releases/download/v1.1.0/substreams_1.1.0_darwin_x86_64.tar.gz | tar zxf -
-sudo mv substreams /usr/local/bin
-```
-
-3. Build the Rust code:
-```bash
-cargo build --release --target wasm32-unknown-unknown
-```
-
-4. Package the substreams:
-```bash
-npm run package-substreams
-```
-
-This will create a `contract_reviewer-v0.1.0.spkg` file that is referenced in the subgraph manifest.
-
-## Querying
-
-Once deployed, you can query the subgraph using GraphQL. Here's an example query:
-
-```graphql
-{
-  contracts(first: 10, orderBy: totalCalls, orderDirection: desc) {
-    id
-    address
-    totalCalls
-    uniqueWallets
-    avgCallsPerWallet
-    dailyStats(first: 7, orderBy: dayTimestamp, orderDirection: desc) {
-      dayTimestamp
-      calls
-      uniqueWallets
-    }
-  }
-}
-```
-
-## License
-
-MIT

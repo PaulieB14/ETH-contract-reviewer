@@ -2,9 +2,16 @@ specVersion: v0.1.0
 package:
   name: contract_reviewer
   version: v0.1.0
+  doc: |
+    Contract Interaction Analytics Substreams
+    
+    This package tracks contract interactions, events, and creations on Ethereum.
+    It provides detailed analytics about contract usage and wallet interactions.
 
 imports:
   entity: https://github.com/streamingfast/substreams-entity-change/releases/download/v0.2.1/substreams-entity-change-v0.2.1.spkg
+
+network: mainnet
 
 protobuf:
   files:
@@ -18,13 +25,30 @@ binaries:
     file: ./target/wasm32-unknown-unknown/release/contract_reviewer.wasm
 
 modules:
+  - name: map_block_index
+    kind: map
+    initialBlock: 21526126
+    inputs:
+      - source: sf.ethereum.type.v2.Block
+    output:
+      type: proto:sf.ethereum.type.v2.Block
+    doc: |
+      Indexes Ethereum blocks for use by other modules.
+      
+      This module simply passes through the block for use by other modules.
+
   - name: map_contract_usage
     kind: map
-    initialBlock: 0
+    initialBlock: 21526126
     inputs:
       - source: sf.ethereum.type.v2.Block
     output:
       type: proto:contract.v1.ContractEvents
+    doc: |
+      Analyzes contract usage patterns from transactions.
+      
+      This module tracks contract interactions, unique wallets, and call counts.
+      It provides a comprehensive view of contract usage.
 
   - name: store_contract_stats
     kind: store
@@ -32,6 +56,11 @@ modules:
     valueType: proto:contract.v1.ContractUsage
     inputs:
       - map: map_contract_usage
+    doc: |
+      Stores contract usage statistics.
+      
+      This module maintains a store of contract usage data, including interaction
+      counts, unique wallet counts, and first/last interaction blocks.
 
   - name: store_daily_stats
     kind: store
@@ -41,15 +70,22 @@ modules:
       - map: map_contract_usage
       - store: store_contract_stats
         mode: deltas
+    doc: |
+      Aggregates daily statistics for contracts.
+      
+      This module maintains daily aggregated statistics across all contracts,
+      including active contracts, new contracts, total calls, and unique wallets.
 
   - name: graph_out
     kind: map
-    initialBlock: 0
+    initialBlock: 21526126
     inputs:
       - map: map_contract_usage
-      - store: store_contract_stats
-        mode: deltas
-      - store: store_daily_stats
-        mode: deltas
     output:
       type: proto:substreams.entity.v1.EntityChanges
+    doc: |
+      Generates entity changes for The Graph.
+      
+      This module transforms contract data into entity changes that can be
+      consumed by a subgraph. It creates entities for contracts, wallets,
+      interactions, and statistics.

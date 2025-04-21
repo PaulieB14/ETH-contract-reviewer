@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package contract.v1;
+
+message ContractEvent {
+  string contract_address = 1;
+  string wallet_address = 2;
+  uint64 block_number = 3;
+  uint64 timestamp = 4;
+  string transaction_hash = 5;
+  uint32 log_index = 6;
+  string event_type = 7;
+  bytes data = 8;
+}
+
+message ContractEventList {
+  repeated ContractEvent events = 1;
+}
+
+message ContractCreation {
+  string contract_address = 1;
+  string creator_address = 2;
+  uint64 block_number = 3;
+  uint64 timestamp = 4;
+  string transaction_hash = 5;
+  bytes bytecode = 6;
+}
+
+message ContractCreationEvents {
+  repeated ContractCreation events = 1;
+}

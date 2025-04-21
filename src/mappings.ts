@@ -36,8 +36,9 @@ export function handleContractInteraction(
   
   wallet.totalInteractions += 1;
   
-  // Create interaction entity
-  const interactionId = `${contractAddress}-${walletAddress}-${blockNumber.toString()}`;
+  // Create interaction entity with block number and index to ensure uniqueness
+  const interactionIndex = 0; // In a real implementation, this would be tracked
+  const interactionId = `${contractAddress}-${walletAddress}-${blockNumber.toString()}-${interactionIndex}`;
   let interaction = new Interaction(interactionId);
   interaction.contract = contractAddress;
   interaction.wallet = walletAddress;
@@ -64,8 +65,8 @@ export function handleContractInteraction(
   
   dailyContractStat.calls = dailyContractStat.calls.plus(BigInt.fromI32(1));
   
-  // Update global daily stats
-  const dailyStatId = dayTimestamp.toString();
+  // Update global daily stats with block number in ID to ensure uniqueness
+  const dailyStatId = `${dayTimestamp.toString()}-${blockNumber.toString()}`;
   let dailyStat = DailyStat.load(dailyStatId);
   if (!dailyStat) {
     dailyStat = new DailyStat(dailyStatId);

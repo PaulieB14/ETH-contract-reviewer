@@ -25,6 +25,19 @@ message ContractEvents {
   repeated ContractUsage contracts = 1;
 }
 
+message ContractCreation {
+  string contract_address = 1;
+  string creator_address = 2;
+  uint64 block_number = 3;
+  uint64 timestamp = 4;
+  string transaction_hash = 5;
+  bytes bytecode = 6;
+}
+
+message ContractCreationEvents {
+  repeated ContractCreation events = 1;
+}
+
 message DailyStats {
   uint64 day_timestamp = 1;
   uint64 active_contracts = 2;

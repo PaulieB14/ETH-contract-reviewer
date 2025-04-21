@@ -1,33 +1,59 @@
-type Contract @entity {
+type Contract @entity(immutable: false) {
   id: ID!                         # Contract address
   address: String!                # Contract address (0x format)
   firstInteractionBlock: BigInt!  # First block number with interaction
   lastInteractionBlock: BigInt!   # Most recent block with interaction
   totalCalls: BigInt!             # Total number of calls to this contract
   uniqueWallets: BigInt!          # Number of unique wallets that called this contract
-  avgCallsPerWallet: BigDecimal!  # Average calls per wallet
   isNewContract: Boolean!         # Whether this is a new contract
+  creationInfo: ContractCreation  # Reference to creation info (if available)
   dailyStats: [DailyContractStat!]! @derivedFrom(field: "contract")
   interactions: [Interaction!]! @derivedFrom(field: "contract")
+  events: [ContractEvent!]! @derivedFrom(field: "contract")
 }
 
-type Wallet @entity {
+type Wallet @entity(immutable: false) {
   id: ID!                         # Wallet address
   address: String!                # Wallet address (0x format)
   interactions: [Interaction!]! @derivedFrom(field: "wallet")
+  events: [ContractEvent!]! @derivedFrom(field: "wallet")
+  contractsCreated: [ContractCreation!]! @derivedFrom(field: "creator")
   contractsInteracted: Int!       # Number of contracts this wallet has interacted with
   totalInteractions: Int!         # Total number of interactions
 }
 
-type Interaction @entity {
-  id: ID!                         # Composite ID (contract-wallet-block)
+type Interaction @entity(immutable: false) {
+  id: ID!                         # Composite ID (contract-wallet-blockNumber-index)
   contract: Contract!             # Reference to the contract
   wallet: Wallet!                 # Reference to the wallet
   blockNumber: BigInt!            # Block number of the interaction
   timestamp: BigInt!              # Timestamp of the interaction
+  transactionHash: String         # Transaction hash (if available)
 }
 
-type DailyContractStat @entity {
+type ContractEvent @entity(immutable: false) {
+  id: ID!                         # Composite ID (txHash-logIndex)
+  contract: Contract!             # Reference to the contract
+  wallet: Wallet!                 # Reference to the wallet that triggered the event
+  blockNumber: BigInt!            # Block number of the event
+  timestamp: BigInt!              # Timestamp of the event
+  transactionHash: String!        # Transaction hash
+  logIndex: Int!                  # Log index in the transaction
+  eventType: String!              # Type of event (e.g., "Transfer", "Approval")
+  data: Bytes                     # Raw event data
+}
+
+type ContractCreation @entity(immutable: false) {
+  id: ID!                         # Contract address
+  contract: Contract!             # Reference to the contract
+  creator: Wallet!                # Reference to the wallet that created the contract
+  blockNumber: BigInt!            # Block number of creation
+  timestamp: BigInt!              # Timestamp of creation
+  transactionHash: String!        # Transaction hash of creation
+  bytecode: Bytes                 # Contract bytecode
+}
+
+type DailyContractStat @entity(immutable: false) {
   id: ID!                         # Composite ID (contract-day)
   contract: Contract!             # Reference to the contract
   dayTimestamp: BigInt!           # Day timestamp (seconds since epoch, aligned to day)
@@ -35,8 +61,8 @@ type DailyContractStat @entity {
   uniqueWallets: BigInt!          # Number of unique wallets on this day
 }
 
-type DailyStat @entity {
-  id: ID!                         # Day timestamp
+type DailyStat @entity(immutable: false) {
+  id: ID!                         # Composite ID (day_timestamp-block_number)
   dayTimestamp: BigInt!           # Day timestamp (seconds since epoch, aligned to day)
   activeContracts: BigInt!        # Number of active contracts
   newContracts: BigInt!           # Number of new contracts
